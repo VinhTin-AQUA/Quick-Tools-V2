@@ -1,0 +1,16 @@
+/home/newtun/Desktop/QuickTools/QuickTools/bin/Debug/net8.0/QuickTools
+/home/newtun/Desktop/QuickTools/QuickTools/bin/Debug/net8.0/QuickTools.deps.json
+/home/newtun/Desktop/QuickTools/QuickTools/bin/Debug/net8.0/QuickTools.runtimeconfig.json
+/home/newtun/Desktop/QuickTools/QuickTools/bin/Debug/net8.0/QuickTools.dll
+/home/newtun/Desktop/QuickTools/QuickTools/bin/Debug/net8.0/QuickTools.pdb
+/home/newtun/Desktop/QuickTools/QuickTools/obj/Debug/net8.0/QuickTools.GeneratedMSBuildEditorConfig.editorconfig
+/home/newtun/Desktop/QuickTools/QuickTools/obj/Debug/net8.0/QuickTools.AssemblyInfoInputs.cache
+/home/newtun/Desktop/QuickTools/QuickTools/obj/Debug/net8.0/QuickTools.AssemblyInfo.cs
+/home/newtun/Desktop/QuickTools/QuickTools/obj/Debug/net8.0/QuickTools.csproj.CoreCompileInputs.cache
+/home/newtun/Desktop/QuickTools/QuickTools/obj/Debug/net8.0/QuickTools.dll
+/home/newtun/Desktop/QuickTools/QuickTools/obj/Debug/net8.0/refint/QuickTools.dll
+/home/newtun/Desktop/QuickTools/QuickTools/obj/Debug/net8.0/QuickTools.pdb
+/home/newtun/Desktop/QuickTools/QuickTools/obj/Debug/net8.0/QuickTools.genruntimeconfig.cache
+/home/newtun/Desktop/QuickTools/QuickTools/obj/Debug/net8.0/ref/QuickTools.dll
+/home/newtun/Desktop/QuickTools/QuickTools/bin/Debug/net8.0/libwebui.so
+/home/newtun/Desktop/QuickTools/QuickTools/bin/Debug/net8.0/webui.dll
