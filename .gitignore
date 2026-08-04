@@ -428,6 +428,7 @@ FodyWeavers.xsd
 *.msm
 *.msp
 
-QuickTools/Native/webui
+QuickTools/Native/*
+!QuickTools/Native/.gitkeep
 .vscode
 .idea

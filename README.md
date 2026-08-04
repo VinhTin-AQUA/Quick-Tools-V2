@@ -23,4 +23,55 @@ QuickTools/Native/webui/windows/webui-2-secure.dll thành QuickTools/Native/webu
 
 ```txt
 dotnet publish QuickTools\QuickTools.csproj -c Release -r win-x64 -p:SelfContained=true  -o ./publish
+
+dotnet publish QuickTools/QuickTools.csproj -c Release -r linux-x64 -p:SelfContained=true  -o ./publish
+
 ```
+
+## Setup binary
+
+- Cấu trúc thư mục Native
+
+```txt
+Native
+Native/linux-x64
+Native/linux-x64/webui
+Native/win-x64
+Native/win-x64/webui
+Native/win-arm64
+Native/linux-arm64
+
+Native/
+
+    win-x64/
+
+        ffmpeg/
+
+            avutil.dll
+            swresample.dll
+            swscale.dll
+            avcodec.dll
+            avformat.dll
+            avfilter.dll
+            avdevice.dll
+
+    linux-x64/
+
+        ffmpeg/
+
+            libavutil.so
+            libswresample.so
+            libswscale.so
+            libavcodec.so
+            libavformat.so
+            libavfilter.so
+            libavdevice.so
+```
+
+- Tên thư mục phải trùng với tên trong DllImport. Ví dụ "webui"
+
+```cs
+private const string Library = "webui";
+```
+
+

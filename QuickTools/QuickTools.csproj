@@ -8,22 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Native\webui\" />
-    </ItemGroup>
 
-    <ItemGroup>
-
-        <None Include="Native\webui\linux\libwebui.so">
+        <None Include="Native\**\*">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-            <TargetPath>libwebui.so</TargetPath>
         </None>
 
-        <None Include="Native\webui\windows\webui.dll">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-            <TargetPath>webui.dll</TargetPath>
-        </None>
         
     </ItemGroup>
     
