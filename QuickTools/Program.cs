@@ -1,4 +1,5 @@
-﻿using QuickTools.Modules.WebUI;
+﻿using QuickTools.Modules.LoaderManager;
+using QuickTools.Modules.WebUI;
 
 namespace QuickTools;
 
@@ -6,6 +7,8 @@ class Program
 {
     static void Main(string[] args)
     {
+        NativeLibraryManager.Initialize();
+        
         Console.WriteLine("Hello, World!");
         
         WebUI app = new();

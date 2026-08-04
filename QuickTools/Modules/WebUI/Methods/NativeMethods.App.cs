@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace QuickTools.Modules.WebUI.Methods
 {
-    public static partial class NativeMethods
+    public static class NativeMethodApps
     {
         private const string Library = "webui";
             

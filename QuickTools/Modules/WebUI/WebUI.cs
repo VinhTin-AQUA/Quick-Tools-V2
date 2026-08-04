@@ -1,3 +1,4 @@
+using QuickTools.Modules.LoaderManager;
 using QuickTools.Modules.WebUI.Methods;
 
 namespace QuickTools.Modules.WebUI
@@ -7,6 +8,12 @@ namespace QuickTools.Modules.WebUI
      */
     public sealed class WebUI
     {
+        private const string Library = "webui";
+
+        public WebUI()
+        {
+        }
+        
         public WebUIWindow CreateWindow()
         {
             return new WebUIWindow();
@@ -14,17 +21,17 @@ namespace QuickTools.Modules.WebUI
 
         public void Wait()
         {
-            NativeMethods.webui_wait();
+            NativeMethodApps.webui_wait();
         }
 
         public void Exit()
         {
-            NativeMethods.webui_exit();
+            NativeMethodApps.webui_exit();
         }
 
         public static void Clean()
         {
-            NativeMethods.webui_clean();
+            NativeMethodApps.webui_clean();
         }
     }
 }
