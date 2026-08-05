@@ -294,3 +294,58 @@ Command Dispatcher
 
 
 
+## Call trong angular
+
+- Tạo file: src/types/webui.d.ts
+
+```ts
+interface Window {
+    runAI: () => Promise<string>;
+    progress: (value: number) => void;
+    finish: () => void;
+}
+```
+
+- Gọi từ Angular component
+
+```ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <button (click)="startAI()">
+      Run AI
+    </button>
+
+    <div>
+      Progress: {{progress}}%
+    </div>
+  `
+})
+export class AppComponent {
+
+  progress = 0;
+
+  constructor() {
+
+    window.progress = (value: number) => {
+      this.progress = value;
+    };
+
+    window.finish = () => {
+      console.log("AI finished");
+    };
+  }
+
+
+  async startAI() {
+    const result = await window.runAI();
+
+    console.log(result);
+  }
+}
+```
+
+
+
