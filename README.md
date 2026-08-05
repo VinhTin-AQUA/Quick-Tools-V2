@@ -33,39 +33,29 @@ dotnet publish QuickTools/QuickTools.csproj -c Release -r linux-x64 -p:SelfConta
 - Cấu trúc thư mục Native
 
 ```txt
-Native
-Native/linux-x64
-Native/linux-x64/webui
-Native/win-x64
-Native/win-x64/webui
-Native/win-arm64
-Native/linux-arm64
-
 Native/
-
-    win-x64/
-
-        ffmpeg/
-
-            avutil.dll
-            swresample.dll
-            swscale.dll
-            avcodec.dll
-            avformat.dll
-            avfilter.dll
-            avdevice.dll
-
-    linux-x64/
-
-        ffmpeg/
-
-            libavutil.so
-            libswresample.so
-            libswscale.so
-            libavcodec.so
-            libavformat.so
-            libavfilter.so
-            libavdevice.so
+├── linux-x64/
+│   ├── ffmpeg/
+│   │   ├── libavutil.so
+│   │   ├── libswresample.so
+│   │   ├── libswscale.so
+│   │   ├── libavcodec.so
+│   │   ├── libavformat.so
+│   │   ├── libavfilter.so
+│   │   └── libavdevice.so
+│   └── webui/
+├── win-x64/
+│   ├── ffmpeg/
+│   │   ├── avutil.dll
+│   │   ├── swresample.dll
+│   │   ├── swscale.dll
+│   │   ├── avcodec.dll
+│   │   ├── avformat.dll
+│   │   ├── avfilter.dll
+│   │   └── avdevice.dll
+│   └── webui/
+├── linux-arm64/
+└── win-arm64/
 ```
 
 - Tên thư mục phải trùng với tên trong DllImport. Ví dụ "webui"

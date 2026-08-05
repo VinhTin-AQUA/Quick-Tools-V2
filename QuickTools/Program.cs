@@ -14,7 +14,7 @@ class Program
         WebUI app = new();
 
         WebUIWindow window = app.CreateWindow();
-        bool result = window.ShowBrowser("https://www.facebook.com/", Browser.Default);
+        bool result = window.ShowBrowser("https://www.google.com/", Browser.Default);
         Console.WriteLine($"Show result: {result}");
         
         window.Close();
