@@ -1,79 +1,201 @@
-﻿using QuickTools.Modules.LoaderManager;
+﻿using System.Runtime.InteropServices;
+using System.Text.Json;
+using QuickTools.Modules.LoaderManager;
 using QuickTools.Modules.WebUI;
 using QuickTools.Modules.WebUI.Methods;
 
-namespace QuickTools;
-
-class Program
+namespace QuickTools
 {
-    static void Main(string[] args)
+    internal class Program
     {
-        // NativeLibraryManager.Initialize();
-        //
-        // Console.WriteLine("Hello, World!");
-        //
-        // WebUIManager app = new();
-        //
-        // WebUIWindow window = app.CreateWindow();
-        // bool result = window.ShowBrowser("https://www.google.com/", Browser.Default);
-        // Console.WriteLine($"Show result: {result}");
-        //
-        // window.Close();
-        // app.Wait();
-        // WebUIManager.Clean();
-        
-        NativeLibraryManager.Initialize();
-        
-        // Tạo window
-        var window = WindowManagementMethods.webui_new_window();
-        
-        // Bind callback
-        WebUIManager.Bind(window, "myFunction", MyCallback);
-        
-        // Set event blocking
-        ConfigMethods.webui_set_event_blocking(window, true);
-        
-        // Show window
-        WebUIManager.Show(window, @"
-            <html>
-            <body>
-                <button onclick='myFunction()'>Click me</button>
-                <button onclick='myFunction(\""Hello\"", 123)'>Send data</button>
-            </body>
-            </html>
-        ");
-        
-        // Wait
-        WindowManagementMethods.webui_wait();
-        
-        // Cleanup
-        WebUIManager.Cleanup();
-    }
-    
-    static void MyCallback(ref webui_event_t e)
-    {
-        Console.WriteLine($"Event: {e.event_type}");
-        Console.WriteLine($"Element: {e.GetElement()}");
-        Console.WriteLine($"Window: {e.window}");
-        
-        // Lấy arguments
-        long count = (long)EventArgumentMethods.webui_get_count(ref e);
-        Console.WriteLine($"Arguments count: {count}");
-        
-        if (count > 0)
+        private static void Main(string[] args)
         {
-            // Lấy string argument
-            string? arg1 = WebUIManager.GetStringAt(ref e, UIntPtr.Zero);
-            Console.WriteLine($"Arg 0: {arg1}");
+            NativeLibraryManager.Initialize();
+
+            // Tạo window
+            var window = WindowManagementMethods.webui_new_window();
             
-            if (count > 1)
-            {
-                long arg2 = EventArgumentMethods.webui_get_int_at(ref e, (UIntPtr)1);
-                Console.WriteLine($"Arg 1: {arg2}");
-            }
+            InterfaceBinder.Bind(window, "longTask", LongTaskHandler);
+            InterfaceBinder.Bind(window, "getData", GetDataHandler);
+            InterfaceBinder.Bind(window, "sendData", SendDataHandler);
+            InterfaceBinder.Bind(window, "requestData", RequestDataHandler);
+            InterfaceBinder.BindAsyncFunction(window, "asyncFunction", MyAsyncFunction);
+
+            // Cấu hình async
+            ConfigMethods.webui_set_config(webui_config.asynchronous_response, true);
+            ConfigMethods.webui_set_event_blocking(window, false);
+            
+            // Show window
+            WebUIManager.Show(window, "/wwwroot/index.html");
+
+
+            // Wait
+            WindowManagementMethods.webui_wait();
+
+            // Cleanup
+            WebUIManager.Cleanup();
         }
         
-        // Trả về response
-        ReturnResponseMethos.webui_return_string(ref e, "Hello from C#!");
+        // Xử lý các tác vụ tốn thời gian mà không block UI, như tính toán phức tạp, xử lý dữ liệu lớn.
+        private static void LongTaskHandler(UIntPtr window, UIntPtr event_type, IntPtr element,
+            UIntPtr event_number, UIntPtr bind_id)
+        {
+            // Lấy param
+            long param = InterfaceMethods.webui_interface_get_int_at(window, event_number, UIntPtr.Zero);
+            Console.WriteLine($"[LongTask] Started with param: {param}");
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(5000);
+                    long result = param * 2;
+
+                    // Trả về kết quả
+                    InterfaceMethods.webui_interface_set_response(window, event_number, result.ToString());
+                    Console.WriteLine($"[LongTask] Completed: {result}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[LongTask] Error: {ex.Message}");
+                    InterfaceMethods.webui_interface_set_response(window, event_number, $"Error: {ex.Message}");
+                }
+            });
+        }
+
+        // Lấy dữ liệu từ Backend
+        private static void GetDataHandler(UIntPtr window, UIntPtr event_type, IntPtr element,
+            UIntPtr event_number, UIntPtr bind_id)
+        {
+            Console.WriteLine("[GetData] Fetching data...");
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(1500);
+                    var data = new
+                    {
+                        id = 123,
+                        name = "Sample Data",
+                        items = new[] { "Item1", "Item2", "Item3" },
+                        timestamp = DateTime.Now
+                    };
+                    string json = JsonSerializer.Serialize(data);
+                    InterfaceMethods.webui_interface_set_response(window, event_number, json);
+                    Console.WriteLine("[GetData] Data returned");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[GetData] Error: {ex.Message}");
+                    InterfaceMethods.webui_interface_set_response(window, event_number, $"Error: {ex.Message}");
+                }
+            });
+        }
+
+        // Gửi dữ liệu xuống Backend
+        private static void SendDataHandler(UIntPtr window, UIntPtr event_type, IntPtr element,
+            UIntPtr event_number, UIntPtr bind_id)
+        {
+            // Lấy string data từ event
+            IntPtr dataPtr = InterfaceMethods.webui_interface_get_string_at(window, event_number, UIntPtr.Zero);
+            string jsonData = Marshal.PtrToStringAnsi(dataPtr);
+            Console.WriteLine($"[SendData] Received: {jsonData}");
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(2000);
+                    
+                    // Parse và validate data
+                    if (!string.IsNullOrEmpty(jsonData))
+                    {
+                        using var doc = JsonDocument.Parse(jsonData);
+                        var root = doc.RootElement;
+                        
+                        if (root.TryGetProperty("name", out var nameElement) &&
+                            root.TryGetProperty("email", out var emailElement))
+                        {
+                            string name = nameElement.GetString();
+                            string email = emailElement.GetString();
+                            Console.WriteLine($"[SendData] Parsed: Name={name}, Email={email}");
+                        }
+                    }
+                    
+                    InterfaceMethods.webui_interface_set_response(window, event_number, "Data saved successfully!");
+                    Console.WriteLine("[SendData] Data saved");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[SendData] Error: {ex.Message}");
+                    InterfaceMethods.webui_interface_set_response(window, event_number, $"Error: {ex.Message}");
+                }
+            });
+        }
+
+        // Xử lý request với ID riêng, thường dùng cho async operations cần theo dõi trạng thái.
+        private static void RequestDataHandler(UIntPtr window, UIntPtr event_type, IntPtr element,
+            UIntPtr event_number, UIntPtr bind_id)
+        {
+            IntPtr requestIdPtr = InterfaceMethods.webui_interface_get_string_at(window, event_number, UIntPtr.Zero);
+            string requestId = Marshal.PtrToStringAnsi(requestIdPtr);
+            Console.WriteLine($"[RequestData] Request ID: {requestId}");
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(3000);
+                    var response = new
+                    {
+                        requestId = requestId,
+                        status = "success",
+                        data = "Response data from backend",
+                        timestamp = DateTime.Now
+                    };
+                    string json = JsonSerializer.Serialize(response);
+                    InterfaceMethods.webui_interface_set_response(window, event_number, json);
+                    Console.WriteLine($"[RequestData] Response sent for: {requestId}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[RequestData] Error: {ex.Message}");
+                    var errorResponse = new
+                    {
+                        requestId = requestId,
+                        status = "error",
+                        error = ex.Message
+                    };
+                    string json = JsonSerializer.Serialize(errorResponse);
+                    InterfaceMethods.webui_interface_set_response(window, event_number, json);
+                }
+            });
+        }
+        
+        // Async Function thuần túy
+        private static async Task<object> MyAsyncFunction(UIntPtr window, UIntPtr event_type, IntPtr element,
+            UIntPtr event_number, UIntPtr bind_id)
+        {
+            // Giả lập xử lý async với Task.Delay
+            Console.WriteLine("[MyAsyncFunction] Step 1: Fetching data...");
+            await Task.Delay(1000);
+            
+            Console.WriteLine("[MyAsyncFunction] Step 2: Processing data...");
+            await Task.Delay(1000);
+            
+            Console.WriteLine("[MyAsyncFunction] Step 3: Saving to database...");
+            await Task.Delay(1000);
+            
+            // Trả về kết quả
+            return new
+            {
+                id = 123,
+                name = "Sample Data",
+                status = "completed",
+                processedAt = DateTime.Now,
+                items = new[] { "Item1", "Item2", "Item3" }
+            };
+        }
     }
 }
