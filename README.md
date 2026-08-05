@@ -1,3 +1,5 @@
+## Download binary
+
 - download binary
 
 ```txt
@@ -18,17 +20,6 @@ QuickTools/Native/webui/windows/webui-2.dll thành QuickTools/Native/webui/windo
 nếu dùng secure thì đổi file secure
 QuickTools/Native/webui/windows/webui-2-secure.dll thành QuickTools/Native/webui/windows/webui.dll
 ```
-
-- build
-
-```txt
-dotnet publish QuickTools\QuickTools.csproj -c Release -r win-x64 -p:SelfContained=true  -o ./publish
-
-dotnet publish QuickTools/QuickTools.csproj -c Release -r linux-x64 -p:SelfContained=true  -o ./publish
-
-```
-
-## Setup binary
 
 - Cấu trúc thư mục Native
 
@@ -60,8 +51,41 @@ Native/
 
 - Tên thư mục phải trùng với tên trong DllImport. Ví dụ "webui"
 
+## Load binaries
+
+- Vào QuickTools/Modules/LoaderManager/NativeLibraryManager.cs, thêm thư mục thư viện
+
+```cs
+private static void RegisterLibraries()
+{
+    // Đăng ký từng thư viện
+    RegisterLibrary("webui", "webui");
+    RegisterLibrary("ffmpeg", "ffmpeg");
+    // Thêm các thư viện khác nếu cần
+    // RegisterLibrary("opencv", "opencv");
+    // RegisterLibrary("tensorflow", "tensorflow");
+}
+```
+
+## build
+
+```txt
+dotnet publish QuickTools\QuickTools.csproj -c Release -r win-x64 -p:SelfContained=true  -o ./publish
+
+dotnet publish QuickTools/QuickTools.csproj -c Release -r linux-x64 -p:SelfContained=true  -o ./publish
+```
+
 ```cs
 private const string Library = "webui";
 ```
 
+## WebUI
 
+### Code Invoke C++ webUI
+
+### JS call BE
+
+- Tạo các Invoke native
+- Tạo interfaceBinder
+- BE setup config async, tạo các hàm, Bind các hàm
+- FE Call các hàm, gửi và nhận dữ liệu
