@@ -255,16 +255,16 @@ private static async Task<object> UploadFileAsync(UIntPtr window, UIntPtr event_
     // Lấy dữ liệu từ JavaScript
     IntPtr dataPtr = InterfaceMethods.webui_interface_get_string_at(window, event_number, UIntPtr.Zero);
     string jsonData = Marshal.PtrToStringAnsi(dataPtr);
-    
+
     Console.WriteLine($"[UploadFile] Received data length: {jsonData?.Length ?? 0}");
 
     // Parse JSON
     using var doc = JsonDocument.Parse(jsonData);
     var root = doc.RootElement;
-    
+
     string fileName = root.GetProperty("fileName").GetString();
     string fileContent = root.GetProperty("fileContent").GetString();
-    
+
     Console.WriteLine($"[UploadFile] File name: {fileName}");
 
     // Tạo thư mục uploads
@@ -280,9 +280,9 @@ private static async Task<object> UploadFileAsync(UIntPtr window, UIntPtr event_
     // Lưu file
     string safeFileName = $"{DateTime.Now:yyyyMMdd_HHmmss}_{Path.GetFileName(fileName)}";
     string filePath = Path.Combine(uploadDir, safeFileName);
-    
+
     await File.WriteAllBytesAsync(filePath, fileBytes);
-    
+
     Console.WriteLine($"[UploadFile] File saved: {filePath} ({fileBytes.Length} bytes)");
 
     // Trả về kết quả
@@ -307,7 +307,6 @@ private static async Task<object> UploadFileAsync(UIntPtr window, UIntPtr event_
 		<script src="webui.js"></script>
 	</head>
 	<body>
-
 		<div>
 			<!-- Drop Zone -->
 			<div class="drop-zone" id="dropZone">
@@ -319,7 +318,6 @@ private static async Task<object> UploadFileAsync(UIntPtr window, UIntPtr event_
 		</div>
 
 		<script>
-
 			let selectedFile = null;
 
 			document.getElementById('fileInput').addEventListener('change', function () {
@@ -346,8 +344,7 @@ private static async Task<object> UploadFileAsync(UIntPtr window, UIntPtr event_
 					// Đọc file thành Base64
 					const base64 = await readFileAsBase64(selectedFile);
 
-                    // console.log(base64);
-                    
+					// console.log(base64);
 
 					// Gọi C# function
 					const data = {
@@ -359,8 +356,7 @@ private static async Task<object> UploadFileAsync(UIntPtr window, UIntPtr event_
 
 					const result = JSON.parse(response);
 
-                    console.log(result);
-                    
+					console.log(result);
 				} catch (error) {
 					console.error(error);
 				}
@@ -392,3 +388,166 @@ private static async Task<object> UploadFileAsync(UIntPtr window, UIntPtr event_
 ```
 
 ### Setup Angular
+
+- Các hàm BE giữ nguyên
+- Điều chỉ lại cấu hình, mặc định webui_show native cỉ hiển thị những gì có trong html, không thể load js hay css, dẫn đến không hiển thị gì từ build angular, vì build angular ra file html,css, js. Cần cấu hình để webui load html, css, js
+
+```cs
+// Set root folder (thư mục chứa file HTML và các assets)
+string rootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+FileAndFolderMethods.webui_set_root_folder(window, rootPath);
+Console.WriteLine($"Root folder set to: {rootPath}");
+
+// Show window
+// WebUIManager.Show(window, "/wwwroot/index.html");
+WebUIManager.Show(window, "index.html");
+```
+
+- Định nghĩa webUI runtime
+
+```ts
+declare var webui: any;
+```
+
+- trong index.html
+
+```html
+<head>
+	<script src="./webui.js"></script>
+</head>
+```
+
+- Service
+
+```ts
+import { Injectable } from '@angular/core';
+
+@Injectable({
+	providedIn: 'root',
+})
+export class WebuiService {
+	constructor() {}
+
+	/**
+	 * Gọi một hàm WebUI
+	 * @param functionName Tên function đã bind trong C#
+	 * @param args Các tham số truyền vào
+	 * @returns Promise với kết quả từ C#
+	 */
+	call<T = any>(functionName: string, ...args: any[]): Promise<T> {
+		return new Promise((resolve, reject) => {
+			try {
+				// Gọi webui.call với function name và các tham số
+				// Nếu có nhiều tham số, truyền vào dạng array
+				const result = webui.call(functionName, ...args);
+				resolve(result);
+			} catch (error) {
+				reject(error);
+			}
+		});
+	}
+
+	/**
+	 * Gọi hàm với tham số JSON
+	 */
+	callJson<T = any>(functionName: string, data: any): Promise<T> {
+		return this.call<T>(functionName, JSON.stringify(data));
+	}
+
+	/**
+	 * Upload file với chunk
+	 */
+	async uploadFileChunked(file: File, chunkSize: number = 1024 * 1024): Promise<any> {
+		const totalChunks = Math.ceil(file.size / chunkSize);
+
+		// 1. Start session
+		const startResult = await this.callJson('startUpload', {
+			fileName: file.name,
+			totalChunks: totalChunks,
+		});
+		const sessionId = startResult.sessionId;
+
+		// 2. Upload từng chunk
+		for (let i = 0; i < totalChunks; i++) {
+			const start = i * chunkSize;
+			const end = Math.min(start + chunkSize, file.size);
+			const chunk = file.slice(start, end);
+
+			const chunkBase64 = await this.readChunkAsBase64(chunk);
+
+			await this.callJson('uploadChunk', {
+				sessionId: sessionId,
+				chunkIndex: i,
+				chunkData: chunkBase64,
+				totalChunks: totalChunks,
+			});
+		}
+
+		// 3. Finish upload
+		const finishResult = await this.callJson('finishUpload', {
+			sessionId: sessionId,
+		});
+
+		return finishResult;
+	}
+
+	/**
+	 * Đọc chunk thành Base64
+	 */
+	private readChunkAsBase64(chunk: Blob): Promise<string> {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.onload = (e: any) => {
+				const base64 = e.target.result.split(',')[1];
+				resolve(base64);
+			};
+			reader.onerror = reject;
+			reader.readAsDataURL(chunk);
+		});
+	}
+}
+```
+
+- sử dụng trong component
+
+```ts
+import { Component, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { WebuiService } from './webui-service';
+
+@Component({
+    selector: 'app-root',
+    imports: [RouterOutlet, ButtonModule],
+    templateUrl: './app.html',
+    styleUrl: './app.css',
+})
+export class App {
+    protected readonly title = signal('quicktools-fe');
+
+    constructor(private webuiService: WebuiService) {}
+
+    async longTask() {
+        const r = await this.webuiService.call<string>('longTask', 2);
+        console.log(r);
+    }
+
+    async getData() {
+        const r = await this.webuiService.call<any>('getData');
+        console.log(r);
+    }
+
+    async sendData() {
+        const r = await this.webuiService.callJson<string>('sendData', {
+            name: 'Pootin',
+            age: 10,
+        });
+        console.log(r);
+    }
+
+    async asyncFunction() {
+        const r = await this.webuiService.call<string>('asyncFunction');
+        console.log(r);
+    }
+}
+```

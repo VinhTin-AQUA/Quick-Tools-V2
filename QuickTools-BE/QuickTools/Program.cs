@@ -27,9 +27,14 @@ namespace QuickTools
             ConfigMethods.webui_set_config(webui_config.asynchronous_response, true);
             ConfigMethods.webui_set_event_blocking(window, false);
             
+            // Set root folder (thư mục chứa file HTML và các assets)
+            string rootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            FileAndFolderMethods.webui_set_root_folder(window, rootPath);
+            Console.WriteLine($"Root folder set to: {rootPath}");
+            
             // Show window
-            WebUIManager.Show(window, "/wwwroot/index.html");
-
+            // WebUIManager.Show(window, "/wwwroot/index.html");
+            WebUIManager.Show(window, "index.html");
 
             // Wait
             WindowManagementMethods.webui_wait();
@@ -39,8 +44,7 @@ namespace QuickTools
         }
         
         // Xử lý các tác vụ tốn thời gian mà không block UI, như tính toán phức tạp, xử lý dữ liệu lớn.
-        private static void LongTaskHandler(UIntPtr window, UIntPtr event_type, IntPtr element,
-            UIntPtr event_number, UIntPtr bind_id)
+        private static void LongTaskHandler(UIntPtr window, UIntPtr event_type, IntPtr element, UIntPtr event_number, UIntPtr bind_id)
         {
             // Lấy param
             long param = InterfaceMethods.webui_interface_get_int_at(window, event_number, UIntPtr.Zero);
@@ -66,8 +70,7 @@ namespace QuickTools
         }
 
         // Lấy dữ liệu từ Backend
-        private static void GetDataHandler(UIntPtr window, UIntPtr event_type, IntPtr element,
-            UIntPtr event_number, UIntPtr bind_id)
+        private static void GetDataHandler(UIntPtr window, UIntPtr event_type, IntPtr element, UIntPtr event_number, UIntPtr bind_id)
         {
             Console.WriteLine("[GetData] Fetching data...");
 
@@ -96,8 +99,7 @@ namespace QuickTools
         }
 
         // Gửi dữ liệu xuống Backend
-        private static void SendDataHandler(UIntPtr window, UIntPtr event_type, IntPtr element,
-            UIntPtr event_number, UIntPtr bind_id)
+        private static void SendDataHandler(UIntPtr window, UIntPtr event_type, IntPtr element, UIntPtr event_number, UIntPtr bind_id)
         {
             // Lấy string data từ event
             IntPtr dataPtr = InterfaceMethods.webui_interface_get_string_at(window, event_number, UIntPtr.Zero);
