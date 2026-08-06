@@ -1,25 +1,4 @@
-## Download binary
-
-- download binary
-
-```txt
-https://github.com/webui-dev/webui/releases/tag/nightly
-
-webui-linux-gcc-x64.zip
-
-webui-windows-msvc-x64.zip
-```
-
-- đổi tên file
-
-```txt
-QuickTools/Native/webui/linux/libwebui-2.so thành QuickTools/Native/webui/linux/libwebui.so
-
-QuickTools/Native/webui/windows/webui-2.dll thành QuickTools/Native/webui/windows/webui.dll
-
-nếu dùng secure thì đổi file secure
-QuickTools/Native/webui/windows/webui-2-secure.dll thành QuickTools/Native/webui/windows/webui.dll
-```
+## Cấu trúc thư mục native
 
 - Cấu trúc thư mục Native
 
@@ -79,13 +58,4 @@ dotnet publish QuickTools/QuickTools.csproj -c Release -r linux-x64 -p:SelfConta
 private const string Library = "webui";
 ```
 
-## WebUI
 
-### Code Invoke C++ webUI
-
-### JS call BE
-
-- Tạo các Invoke native
-- Tạo interfaceBinder
-- BE setup config async, tạo các hàm, Bind các hàm
-- FE Call các hàm, gửi và nhận dữ liệu
