@@ -6,8 +6,7 @@ namespace QuickTools.Modules.WebUI
     {
         public static string PtrToString(IntPtr ptr)
         {
-            return Marshal.PtrToStringUTF8(ptr)
-                   ?? string.Empty;
+            return Marshal.PtrToStringUTF8(ptr) ?? string.Empty;
         }
     }
 }

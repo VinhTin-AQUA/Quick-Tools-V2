@@ -20,6 +20,8 @@ namespace QuickTools
             InterfaceBinder.Bind(window, "sendData", SendDataHandler);
             InterfaceBinder.Bind(window, "requestData", RequestDataHandler);
             InterfaceBinder.BindAsyncFunction(window, "asyncFunction", MyAsyncFunction);
+            
+            InterfaceBinder.BindAsyncFunction(window, "uploadFile", UploadFileAsync);
 
             // Cấu hình async
             ConfigMethods.webui_set_config(webui_config.asynchronous_response, true);
@@ -99,7 +101,7 @@ namespace QuickTools
         {
             // Lấy string data từ event
             IntPtr dataPtr = InterfaceMethods.webui_interface_get_string_at(window, event_number, UIntPtr.Zero);
-            string jsonData = Marshal.PtrToStringAnsi(dataPtr);
+            string jsonData = MarshalHelper.PtrToString(dataPtr);
             Console.WriteLine($"[SendData] Received: {jsonData}");
 
             Task.Run(async () =>
@@ -135,11 +137,10 @@ namespace QuickTools
         }
 
         // Xử lý request với ID riêng, thường dùng cho async operations cần theo dõi trạng thái.
-        private static void RequestDataHandler(UIntPtr window, UIntPtr event_type, IntPtr element,
-            UIntPtr event_number, UIntPtr bind_id)
+        private static void RequestDataHandler(UIntPtr window, UIntPtr event_type, IntPtr element, UIntPtr event_number, UIntPtr bind_id)
         {
             IntPtr requestIdPtr = InterfaceMethods.webui_interface_get_string_at(window, event_number, UIntPtr.Zero);
-            string requestId = Marshal.PtrToStringAnsi(requestIdPtr);
+            string requestId = MarshalHelper.PtrToString(requestIdPtr);
             Console.WriteLine($"[RequestData] Request ID: {requestId}");
 
             Task.Run(async () =>
@@ -174,8 +175,7 @@ namespace QuickTools
         }
         
         // Async Function thuần túy
-        private static async Task<object> MyAsyncFunction(UIntPtr window, UIntPtr event_type, IntPtr element,
-            UIntPtr event_number, UIntPtr bind_id)
+        private static async Task<object> MyAsyncFunction(UIntPtr window, UIntPtr event_type, IntPtr element, UIntPtr event_number, UIntPtr bind_id)
         {
             // Giả lập xử lý async với Task.Delay
             Console.WriteLine("[MyAsyncFunction] Step 1: Fetching data...");
@@ -197,5 +197,53 @@ namespace QuickTools
                 items = new[] { "Item1", "Item2", "Item3" }
             };
         }
+        
+        // ==================== Async Function trả về object ====================
+        private static async Task<object> UploadFileAsync(UIntPtr window, UIntPtr event_type, IntPtr element, UIntPtr event_number, UIntPtr bind_id)
+        {
+            // Lấy dữ liệu từ JavaScript
+            IntPtr dataPtr = InterfaceMethods.webui_interface_get_string_at(window, event_number, UIntPtr.Zero);
+            string jsonData = Marshal.PtrToStringAnsi(dataPtr);
+            
+            Console.WriteLine($"[UploadFile] Received data length: {jsonData?.Length ?? 0}");
+
+            // Parse JSON
+            using var doc = JsonDocument.Parse(jsonData);
+            var root = doc.RootElement;
+            
+            string fileName = root.GetProperty("fileName").GetString();
+            string fileContent = root.GetProperty("fileContent").GetString();
+            
+            Console.WriteLine($"[UploadFile] File name: {fileName}");
+
+            // Tạo thư mục uploads
+            string uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+            if (!Directory.Exists(uploadDir))
+            {
+                Directory.CreateDirectory(uploadDir);
+            }
+
+            // Decode Base64 thành byte array
+            byte[] fileBytes = Convert.FromBase64String(fileContent);
+
+            // Lưu file
+            string safeFileName = $"{DateTime.Now:yyyyMMdd_HHmmss}_{Path.GetFileName(fileName)}";
+            string filePath = Path.Combine(uploadDir, safeFileName);
+            
+            await File.WriteAllBytesAsync(filePath, fileBytes);
+            
+            Console.WriteLine($"[UploadFile] File saved: {filePath} ({fileBytes.Length} bytes)");
+
+            // Trả về kết quả
+            return new
+            {
+                status = "success",
+                fileName = safeFileName,
+                filePath = filePath,
+                size = fileBytes.Length,
+                message = "File uploaded successfully!"
+            };
+        }
+
     }
 }

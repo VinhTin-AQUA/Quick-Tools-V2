@@ -19,5 +19,9 @@
             <CopyToPublishDirectory>Always</CopyToPublishDirectory>
         </None>
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="uploads\" />
+    </ItemGroup>
     
 </Project>

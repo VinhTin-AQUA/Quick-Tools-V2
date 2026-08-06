@@ -244,4 +244,151 @@ QuickTools/
 </html>
 ```
 
+- upload file
+
+```cs
+
+InterfaceBinder.BindAsyncFunction(window, "uploadFile", UploadFileAsync);
+
+private static async Task<object> UploadFileAsync(UIntPtr window, UIntPtr event_type, IntPtr element, UIntPtr event_number, UIntPtr bind_id)
+{
+    // Lấy dữ liệu từ JavaScript
+    IntPtr dataPtr = InterfaceMethods.webui_interface_get_string_at(window, event_number, UIntPtr.Zero);
+    string jsonData = Marshal.PtrToStringAnsi(dataPtr);
+    
+    Console.WriteLine($"[UploadFile] Received data length: {jsonData?.Length ?? 0}");
+
+    // Parse JSON
+    using var doc = JsonDocument.Parse(jsonData);
+    var root = doc.RootElement;
+    
+    string fileName = root.GetProperty("fileName").GetString();
+    string fileContent = root.GetProperty("fileContent").GetString();
+    
+    Console.WriteLine($"[UploadFile] File name: {fileName}");
+
+    // Tạo thư mục uploads
+    string uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+    if (!Directory.Exists(uploadDir))
+    {
+        Directory.CreateDirectory(uploadDir);
+    }
+
+    // Decode Base64 thành byte array
+    byte[] fileBytes = Convert.FromBase64String(fileContent);
+
+    // Lưu file
+    string safeFileName = $"{DateTime.Now:yyyyMMdd_HHmmss}_{Path.GetFileName(fileName)}";
+    string filePath = Path.Combine(uploadDir, safeFileName);
+    
+    await File.WriteAllBytesAsync(filePath, fileBytes);
+    
+    Console.WriteLine($"[UploadFile] File saved: {filePath} ({fileBytes.Length} bytes)");
+
+    // Trả về kết quả
+    return new
+    {
+        status = "success",
+        fileName = safeFileName,
+        filePath = filePath,
+        size = fileBytes.Length,
+        message = "File uploaded successfully!"
+    };
+}
+```
+
+```html
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<script src="webui.js"></script>
+	</head>
+	<body>
+
+		<div>
+			<!-- Drop Zone -->
+			<div class="drop-zone" id="dropZone">
+				<input type="file" id="fileInput" />
+			</div>
+
+			<!-- Upload Button -->
+			<button id="uploadBtn" onclick="uploadFile()">Upload File</button>
+		</div>
+
+		<script>
+
+			let selectedFile = null;
+
+			document.getElementById('fileInput').addEventListener('change', function () {
+				if (this.files.length > 0) {
+					selectFile(this.files[0]);
+				}
+			});
+
+			// ==================== Select File ====================
+			function selectFile(file) {
+				selectedFile = file;
+			}
+
+			// ==================== Upload ====================
+			async function uploadFile() {
+				if (!selectedFile) {
+					alert('Please select a file first!');
+					return;
+				}
+
+				console.log(selectedFile);
+
+				try {
+					// Đọc file thành Base64
+					const base64 = await readFileAsBase64(selectedFile);
+
+                    // console.log(base64);
+                    
+
+					// Gọi C# function
+					const data = {
+						fileName: selectedFile.name,
+						fileContent: base64,
+					};
+
+					const response = await webui.call('uploadFile', JSON.stringify(data));
+
+					const result = JSON.parse(response);
+
+                    console.log(result);
+                    
+				} catch (error) {
+					console.error(error);
+				}
+			}
+
+			// ==================== Helper ====================
+			function readFileAsBase64(file) {
+				return new Promise((resolve, reject) => {
+					const reader = new FileReader();
+					reader.onload = e => {
+						const base64 = e.target.result.split(',')[1];
+						resolve(base64);
+					};
+					reader.onerror = reject;
+					reader.readAsDataURL(file);
+				});
+			}
+
+			function formatFileSize(bytes) {
+				if (bytes === 0) return '0 Bytes';
+				const k = 1024;
+				const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+				const i = Math.floor(Math.log(bytes) / Math.log(k));
+				return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+			}
+		</script>
+	</body>
+</html>
+```
+
 ### Setup Angular
