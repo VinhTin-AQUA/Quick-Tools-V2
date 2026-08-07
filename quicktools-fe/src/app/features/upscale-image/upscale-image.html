@@ -1,0 +1,140 @@
+<!-- file: image-upload.component.html -->
+<div class="image-upload-container">
+    <!-- Section 1: Source Information -->
+    <div class="source-section">
+        <div class="source-info">
+            <span class="source-label">📁 Cre:</span>
+            <span class="source-value">iIoveIMG</span>
+            <a href="https://www.iloveimg.com/upscale-image" class="source-link">🔗 Click here</a>
+        </div>
+    </div>
+
+    <!-- Section 2: Controls -->
+    <div class="controls-section">
+        <div class="controls-container">
+            <div class="select-wrapper">
+                <label class="control-label">Size multiplier:</label>
+
+                <p-select
+                    [options]="getSelectOptions()"
+                    [(ngModel)]="selectedOption"
+                    placeholder="Select a City"
+                    class="custom-select"
+                />
+            </div>
+
+            <div class="button-group">
+                <p-button
+                    label="🗑️ Clear"
+                    (onClick)="onClear()"
+                    variant="outlined"
+                    severity="contrast"
+                />
+
+                <p-button severity="success" (onClick)="onUpload()" [disabled]="isUploading">
+                    <span class="icon"></span>
+                    <span>{{ 'Upload' }}</span>
+                </p-button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Two Columns -->
+    <div class="gallery-section">
+        <!-- Left Column - Original Images List -->
+        <div class="column left-column">
+            <h3 class="column-title">📷 Orginal</h3>
+            <div class="image-list">
+                @for (image of processedImages; track image.id) {
+                    <div
+                        class="image-item"
+                        (click)="onImageClick(image)"
+                        [class.selected]="image.selected"
+                    >
+                        <div class="image-thumbnail">
+                            <img [src]="image.thumbnail" [alt]="image.name" loading="lazy" />
+                        </div>
+                        <div class="image-info">
+                            <span class="image-name">{{ image.name }}</span>
+                            <span class="image-size">{{ formatFileSize(image.size) }}</span>
+                        </div>
+                    </div>
+                } @empty {
+                    <div class="empty-state">
+                        <span>📭 No image</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Right Column - Processed Images List -->
+        <div class="column right-column">
+            <h3 class="column-title">🔄 Processed</h3>
+            <div class="image-list">
+                @for (image of processedImages; track image.id) {
+                    <div class="image-item processed-item">
+                        <div class="image-info">
+                            <span class="image-name">{{ image.name }}</span>
+                            <span class="image-size">{{ formatFileSize(image.size) }}</span>
+                        </div>
+
+                        <p-button
+                            label="📁"
+                            (onClick)="toggleSelect(image)"
+                            [raised]="true"
+                            severity="secondary"
+                        />
+                    </div>
+                } @empty {
+                    <div class="empty-state">
+                        <span>📭 Không có ảnh xử lý</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 4: Submit & Progress -->
+    <div class="action-section">
+        <div class="action-container">
+            <p-button
+                label="✅ Submit"
+                (onClick)="onSubmit()"
+                [disabled]="!images.length"
+                [raised]="true"
+                severity="contrast"
+            />
+
+            @if (isUploading || progress > 0) {
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div
+                            class="progress-fill"
+                            [style.width.%]="progress"
+                            [style.background]="'var(--p-primary-color)'"
+                        ></div>
+                    </div>
+                    <span class="progress-label">{{ progress }}%</span>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Popup for image preview -->
+@if (showPopup && selectedImage) {
+    <div class="popup-overlay" (click)="closePopup()">
+        <div class="popup-content" (click)="$event.stopPropagation()">
+            <div class="popup-header">
+                <h3>{{ selectedImage.name }}</h3>
+                <button class="btn-close" (click)="closePopup()">✕</button>
+            </div>
+            <div class="popup-body">
+                <img [src]="selectedImage.url" [alt]="selectedImage.name" />
+                <div class="popup-footer">
+                    <span>Kích thước: {{ formatFileSize(selectedImage.size) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+}

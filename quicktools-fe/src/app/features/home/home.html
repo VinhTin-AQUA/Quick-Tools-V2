@@ -60,7 +60,7 @@
             @if (filteredMenuItems.length > 0) {
                 <div class="menu-grid">
                     @for (menu of filteredMenuItems; track menu.name) {
-                        <div class="menu-item">
+                        <div [routerLink]="menu.route" class="menu-item">
                             <div class="menu-item-icon">
                                 {{ menu.icon }}
                             </div>

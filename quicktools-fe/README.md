@@ -3,6 +3,7 @@
 ## Prompt
 
 ```txt
+Trong angular,
 Sử dụng PrimeNG Theme (styled mode) làm nguồn màu duy nhất cho toàn bộ giao diện.
 
 Toàn bộ màu phải lấy từ PrimeNG CSS variables (--p-*).
@@ -97,6 +98,8 @@ Phong cách:
 
 Mục tiêu:
 Một giao diện có thể đổi toàn bộ theme chỉ bằng cách thay đổi PrimeNG preset/semantic config mà không cần sửa HTML/CSS.
+
+Đồng thời phải sử dụng các control hiện đại, ví dụ @for, @if
 
 mô tả giao diện:
 

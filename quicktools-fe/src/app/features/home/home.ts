@@ -4,10 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { InfoItem, MenuItem } from './models';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { ButtonModule } from '@openng/optimus-ui/button';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-home',
-    imports: [CommonModule, FormsModule, InputTextModule, ButtonModule],
+    imports: [CommonModule, FormsModule, InputTextModule, ButtonModule, RouterLink],
     templateUrl: './home.html',
     styleUrl: './home.css',
 })
@@ -38,7 +39,7 @@ export class Home {
 
     // Danh sách menu
     menuItems: MenuItem[] = [
-        { icon: '🖼️', name: 'Upscale Img', route: '/dashboard' },
+        { icon: '🖼️', name: 'Upscale Img', route: '/upscale-image' },
         { icon: '🖼️', name: 'Split Img', route: '/profile' },
     ];
 
