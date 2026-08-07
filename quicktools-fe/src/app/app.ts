@@ -1,26 +1,21 @@
 import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { ButtonModule } from '@openng/optimus-ui/button';
 import { WebuiService } from './webui-service';
-import { Optimus } from '@openng/optimus-ui/config';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
     selector: 'app-root',
-    imports: [RouterOutlet, ButtonModule],
+    imports: [RouterOutlet],
     templateUrl: './app.html',
     styleUrl: './app.css',
 })
 export class App {
     protected readonly title = signal('quicktools-fe');
 
-    constructor(
-        private webuiService: WebuiService,
-        private config: Optimus,
-    ) {}
+    constructor(private webuiService: WebuiService) {}
 
-    ngOnInit() {
-        this.config.ripple.set(true);
-    }
+    ngOnInit() {}
+
+    //
 
     async longTask() {
         const r = await this.webuiService.call<string>('longTask', 2);

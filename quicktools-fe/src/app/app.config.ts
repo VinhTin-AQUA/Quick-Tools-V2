@@ -1,56 +1,57 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
-
 import { routes } from './app.routes';
 import { provideOptimus } from '@openng/optimus-ui/config';
-import Aura from '@openng/optimus-ui-themes/aura';
-import Lara from '@openng/optimus-ui-themes/lara';
 import Material from '@openng/optimus-ui-themes/material';
-import Nora from '@openng/optimus-ui-themes/nora';
 import { definePreset } from '@openng/optimus-ui-themes';
 
 const Noir = definePreset(Material, {
     semantic: {
+        // Brand color
         primary: {
-            50: '{zinc.50}',
-            100: '{zinc.100}',
-            200: '{zinc.200}',
-            300: '{zinc.300}',
-            400: '{zinc.400}',
-            500: '{zinc.500}',
-            600: '{zinc.600}',
-            700: '{zinc.700}',
-            800: '{zinc.800}',
-            900: '{zinc.900}',
-            950: '{zinc.950}',
+            50: '{indigo.50}',
+            100: '{indigo.100}',
+            200: '{indigo.200}',
+            300: '{indigo.300}',
+            400: '{indigo.400}',
+            500: '{indigo.500}',
+            600: '{indigo.600}',
+            700: '{indigo.700}',
+            800: '{indigo.800}',
+            900: '{indigo.900}',
+            950: '{indigo.950}',
         },
+
         colorScheme: {
             light: {
                 primary: {
-                    color: '{zinc.950}',
+                    color: '{indigo.600}',
                     inverseColor: '#ffffff',
-                    hoverColor: '{zinc.900}',
-                    activeColor: '{zinc.800}',
+                    hoverColor: '{indigo.700}',
+                    activeColor: '{indigo.800}',
                 },
+
                 highlight: {
-                    background: '{zinc.950}',
-                    focusBackground: '{zinc.700}',
-                    color: '#ffffff',
-                    focusColor: '#ffffff',
+                    background: '{indigo.100}',
+                    focusBackground: '{indigo.200}',
+                    color: '{indigo.900}',
+                    focusColor: '{indigo.950}',
                 },
             },
+
             dark: {
                 primary: {
-                    color: '{zinc.50}',
-                    inverseColor: '{zinc.950}',
-                    hoverColor: '{zinc.100}',
-                    activeColor: '{zinc.200}',
+                    color: '{indigo.400}',
+                    inverseColor: '{slate.950}',
+                    hoverColor: '{indigo.300}',
+                    activeColor: '{indigo.200}',
                 },
+
                 highlight: {
-                    background: 'rgba(250, 250, 250, .16)',
-                    focusBackground: 'rgba(250, 250, 250, .24)',
-                    color: 'rgba(255,255,255,.87)',
-                    focusColor: 'rgba(255,255,255,.87)',
+                    background: '{indigo.500}',
+                    focusBackground: '{indigo.400}',
+                    color: '#ffffff',
+                    focusColor: '#ffffff',
                 },
             },
         },
@@ -67,7 +68,7 @@ export const appConfig: ApplicationConfig = {
                 options: {
                     prefix: 'p',
                     cssLayer: false,
-                    darkModeSelector: false || 'none', // 'system'
+                    darkModeSelector: '.dark', // 'system'
                 },
             },
             ripple: true,

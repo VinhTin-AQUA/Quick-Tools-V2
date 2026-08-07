@@ -1,59 +1,103 @@
 # QuicktoolsFe
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.4.
+## Prompt
 
-## Development server
+```txt
+Sử dụng PrimeNG Theme (styled mode) làm nguồn màu duy nhất cho toàn bộ giao diện.
 
-To start a local development server, run:
+Toàn bộ màu phải lấy từ PrimeNG CSS variables (--p-*).
 
-```bash
-ng serve
+Quy tắc sử dụng màu:
+
+1. Background:
+- Page background:
+  var(--p-ground-background)
+
+- Card, panel, container:
+  var(--p-content-background)
+
+- Hover background của component:
+  var(--p-content-hover-background)
+
+- Không sử dụng --p-surface-50, --p-surface-100 cho background của component vì chúng không đảm bảo đảo màu chính xác giữa light/dark mode.
+
+2. Text:
+- Text chính:
+  var(--p-text-color)
+
+- Text phụ, label, description:
+  var(--p-text-muted-color)
+
+- Text khi hover:
+  var(--p-text-hover-color)
+
+3. Border:
+- Border mặc định:
+  var(--p-content-border-color)
+
+4. Primary / Brand color:
+Sử dụng semantic primary token của PrimeNG:
+
+- Main:
+  var(--p-primary-color)
+
+- Hover:
+  var(--p-primary-hover-color)
+
+- Active:
+  var(--p-primary-active-color)
+
+- Text/icon trên primary background:
+  var(--p-primary-inverse-color)
+
+5. Highlight / Selection:
+Sử dụng:
+
+- Background:
+  var(--p-highlight-background)
+
+- Focus background:
+  var(--p-highlight-focus-background)
+
+- Text:
+  var(--p-highlight-color)
+
+Không tự tạo màu hover bằng rgba hoặc hex.
+
+6. Input/Form:
+Sử dụng PrimeNG form field tokens:
+
+- Background:
+  var(--p-form-field-background)
+
+- Text:
+  var(--p-form-field-color)
+
+- Border:
+  var(--p-form-field-border-color)
+
+- Placeholder:
+  var(--p-form-field-placeholder-color)
+
+- Focus:
+  var(--p-primary-color)
+
+
+Yêu cầu hỗ trợ Dark Mode:
+- Giao diện phải tự động thích nghi khi thay đổi class .dark.
+- Không hard-code màu light hoặc dark.
+- Không dùng media query prefers-color-scheme.
+- Không tạo riêng CSS cho dark mode.
+- Chỉ thông qua PrimeNG semantic tokens.
+
+Phong cách:
+- Dùng CSS thuần hoặc CSS module/scoped CSS cho layout.
+- PrimeNG quản lý toàn bộ màu sắc.
+- Layout, spacing, typography có thể tự thiết kế nhưng tuyệt đối không thay thế hệ thống màu của PrimeNG.
+
+Mục tiêu:
+Một giao diện có thể đổi toàn bộ theme chỉ bằng cách thay đổi PrimeNG preset/semantic config mà không cần sửa HTML/CSS.
+
+mô tả giao diện:
+
 ```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
