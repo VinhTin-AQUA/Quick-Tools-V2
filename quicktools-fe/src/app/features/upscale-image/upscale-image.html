@@ -1,14 +1,5 @@
 <!-- file: image-upload.component.html -->
 <div class="image-upload-container">
-    <!-- Section 1: Source Information -->
-    <div class="source-section">
-        <div class="source-info">
-            <span class="source-label">📁 Cre:</span>
-            <span class="source-value">iIoveIMG</span>
-            <a href="https://www.iloveimg.com/upscale-image" class="source-link">🔗 Click here</a>
-        </div>
-    </div>
-
     <!-- Section 2: Controls -->
     <div class="controls-section">
         <div class="controls-container">
@@ -44,18 +35,29 @@
         <div class="column left-column">
             <h3 class="column-title">📷 Orginal {{ totalSize() | fileSize }}</h3>
             <div class="image-list">
-                @for (image of previewImages(); track image.id) {
+                @for (image of uploadedFiles(); track image.id) {
                     <div
                         class="image-item"
                         (click)="onImageClick(image)"
                         [class.selected]="image.selected"
                     >
                         <div class="image-preview-url">
-                            <img [src]="image.previewUrl" [alt]="image.name" loading="lazy" />
+                            <img [src]="image.previewUrl" [alt]="image.file.name" loading="lazy" />
                         </div>
                         <div class="image-info">
-                            <span class="image-name">{{ image.name }}</span>
-                            <span class="image-size">{{ image.size | fileSize }}</span>
+                            <span class="image-name">{{ image.file.name }}</span>
+                            <span class="image-size">{{ image.file.size | fileSize }}</span>
+                        </div>
+
+                        <div class="">
+                            <p-button
+                                icon="pi pi-times"
+                                [rounded]="true"
+                                [text]="true"
+                                [raised]="true"
+                                severity="danger"
+                                (onClick)="removeImage($event, image.id)"
+                            />
                         </div>
                     </div>
                 } @empty {
@@ -73,8 +75,8 @@
                 @for (image of processedImages(); track image.id) {
                     <div class="image-item processed-item">
                         <div class="image-info">
-                            <span class="image-name">{{ image.name }}</span>
-                            <span class="image-size">{{ image.size | fileSize }}</span>
+                            <span class="image-name">{{ image.file.name }}</span>
+                            <span class="image-size">{{ image.file.size | fileSize }}</span>
                         </div>
 
                         <p-button
@@ -119,6 +121,14 @@
             }
         </div>
     </div>
+
+    <div class="source-section">
+        <div class="source-info">
+            <span class="source-label">📁 Cre:</span>
+            <span class="source-value">iIoveIMG</span>
+            <a href="https://www.iloveimg.com/upscale-image" class="source-link">🔗 Click here</a>
+        </div>
+    </div>
 </div>
 
 <!-- Popup for image preview -->
@@ -126,13 +136,13 @@
     <div class="popup-overlay" (click)="closePopupImagePreview()">
         <div class="popup-content" (click)="$event.stopPropagation()">
             <div class="popup-header">
-                <h3>{{ selectedImage.name }}</h3>
+                <h3>{{ selectedImage.file.name }}</h3>
                 <button class="btn-close" (click)="closePopupImagePreview()">✕</button>
             </div>
             <div class="popup-body">
-                <img [src]="selectedImage.previewUrl" [alt]="selectedImage.name" />
+                <img [src]="selectedImage.previewUrl" [alt]="selectedImage.file.name" />
                 <div class="popup-footer">
-                    <span>Kích thước: {{ selectedImage.size | fileSize }}</span>
+                    <span>Kích thước: {{ selectedImage.file.size | fileSize }}</span>
                 </div>
             </div>
         </div>

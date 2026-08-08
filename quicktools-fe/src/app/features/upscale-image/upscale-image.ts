@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ImageItem } from './models';
+import { FileModel } from '../../models/file.model';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { FileUploadEvent, FileUploadModule } from '@openng/optimus-ui/fileupload';
@@ -31,31 +31,19 @@ export class UpscaleImage {
     selectedOption: string = '1';
     sizeMultiplierOptions = ['1', '2'];
 
-    uploadedFiles = signal<File[]>([]);
+    uploadedFiles = signal<FileModel[]>([]);
     totalSize = computed(() => {
-        return this.uploadedFiles().reduce((sum, file) => sum + file.size, 0);
+        return this.uploadedFiles().reduce((sum, file) => sum + file.file.size, 0);
     });
 
-    previewImages = computed(() => {
-        const images = this.uploadedFiles().map((file) => {
-            const image: ImageItem = {
-                id: crypto.randomUUID().toString(),
-                name: file.name,
-                previewUrl: URL.createObjectURL(file),
-                size: file.size,
-            };
-            return image;
-        });
-        return images;
-    });
-    selectedImage: ImageItem | null = null;
+    selectedImage: FileModel | null = null;
     showPopupImagePreview: boolean = false;
-    processedImages = signal<ImageItem[]>([]);
 
+    processedImages = signal<FileModel[]>([]);
     progress: number = 0;
     isUploading: boolean = false;
 
-    onImageClick(image: ImageItem): void {
+    onImageClick(image: FileModel): void {
         this.selectedImage = image;
         this.showPopupImagePreview = true;
     }
@@ -65,16 +53,29 @@ export class UpscaleImage {
         this.selectedImage = null;
     }
 
-    onClear(): void {
-        this.progress = 0;
-        this.uploadedFiles.set([]);
+    removeImage(event: MouseEvent, id: string) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.uploadedFiles.update((currentFiles) => currentFiles.filter((f) => f.id !== id));
     }
 
     onSubmit(): void {
         console.log('Submitting images:', this.uploadedFiles().length);
     }
 
-    toggleSelect(image: ImageItem): void {
+    onClear(): void {
+        this.progress = 0;
+        this.uploadedFiles.set([]);
+    }
+
+    toggleSelect(image: FileModel): void {
         image.selected = !image.selected;
+    }
+
+    ngOnDestroy() {
+        for (let prev of this.uploadedFiles()) {
+            URL.revokeObjectURL(prev.previewUrl);
+        }
+        this.onClear();
     }
 }

@@ -2,33 +2,31 @@ import { Component, input, model, output } from '@angular/core';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { FileSelectEvent, FileUploadModule } from '@openng/optimus-ui/fileupload';
 import { TagModule } from '@openng/optimus-ui/tag';
-import { FileSizePipe } from '../../pipes/file-size-pipe';
+import { FileModel } from '../../models/file.model';
 
 @Component({
     selector: 'file-upload-component',
-    imports: [ButtonModule, FileUploadModule, TagModule, FileSizePipe],
+    imports: [ButtonModule, FileUploadModule, TagModule],
     templateUrl: './file-upload.component.html',
     styleUrl: './file-upload.component.css',
 })
 export class FileUploadComponent {
-    files = model<File[]>([]);
+    files = model<FileModel[]>([]);
     isDragging = false;
 
     onSelectFile(event: FileSelectEvent) {
         const fileList = event.currentFiles || [];
         const filesArray = Array.isArray(fileList) ? fileList : [];
-        this.files.set(filesArray);
+        this.handleSelectFiles(filesArray);
 
         // filesArray.forEach((file, index) => {
         //     console.log(`File ${index + 1}: ${file.name} (${file.size} bytes)`);
         // });
     }
 
-    // Khi file được kéo vào vùng upload
     onDragOver(event: DragEvent) {
         event.preventDefault();
         event.stopPropagation();
-
         this.isDragging = true;
     }
 
@@ -55,6 +53,19 @@ export class FileUploadComponent {
 
         const filesArray = Array.from(fileList).filter((file) => file.type.startsWith('image/'));
 
-        this.files.set(filesArray);
+        this.handleSelectFiles(filesArray);
+    }
+
+    handleSelectFiles(filesArray: File[]) {
+        const files = filesArray.map((f) => {
+            const file: FileModel = {
+                id: crypto.randomUUID().toString(),
+                file: f,
+                previewUrl: URL.createObjectURL(f),
+            };
+            return file;
+        });
+        // this.files.set(files);
+        this.files.update((currentFiles) => [...currentFiles, ...files]);
     }
 }

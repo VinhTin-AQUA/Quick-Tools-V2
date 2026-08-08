@@ -1,7 +1,6 @@
-export interface ImageItem {
+export interface FileModel {
     id: string;
-    name: string;
-    size: number;
+    file: File;
     previewUrl: string;
     selected?: boolean;
 }
