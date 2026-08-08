@@ -30,33 +30,28 @@
                     variant="outlined"
                     severity="contrast"
                 />
-
-                <p-button
-                    (onClick)="onShowPopupChooseFiles()"
-                    severity="success"
-                    [disabled]="isUploading"
-                >
-                    <span class="icon"></span>
-                    <span>{{ 'Upload' }}</span>
-                </p-button>
             </div>
         </div>
+    </div>
+
+    <div>
+        <file-upload-component [(files)]="uploadedFiles"></file-upload-component>
     </div>
 
     <!-- Section 3: Two Columns -->
     <div class="gallery-section">
         <!-- Left Column - Original Images List -->
         <div class="column left-column">
-            <h3 class="column-title">📷 Orginal</h3>
+            <h3 class="column-title">📷 Orginal {{ totalSize() | fileSize }}</h3>
             <div class="image-list">
-                @for (image of processedImages; track image.id) {
+                @for (image of previewImages(); track image.id) {
                     <div
                         class="image-item"
                         (click)="onImageClick(image)"
                         [class.selected]="image.selected"
                     >
-                        <div class="image-thumbnail">
-                            <img [src]="image.thumbnail" [alt]="image.name" loading="lazy" />
+                        <div class="image-preview-url">
+                            <img [src]="image.previewUrl" [alt]="image.name" loading="lazy" />
                         </div>
                         <div class="image-info">
                             <span class="image-name">{{ image.name }}</span>
@@ -73,9 +68,9 @@
 
         <!-- Right Column - Processed Images List -->
         <div class="column right-column">
-            <h3 class="column-title">🔄 Processed</h3>
+            <h3 class="column-title">🔄 Processed {{ totalSize() | fileSize }}</h3>
             <div class="image-list">
-                @for (image of processedImages; track image.id) {
+                @for (image of processedImages(); track image.id) {
                     <div class="image-item processed-item">
                         <div class="image-info">
                             <span class="image-name">{{ image.name }}</span>
@@ -91,7 +86,7 @@
                     </div>
                 } @empty {
                     <div class="empty-state">
-                        <span>📭 Không có ảnh xử lý</span>
+                        <span>📭 No image</span>
                     </div>
                 }
             </div>
@@ -101,10 +96,11 @@
     <!-- Section 4: Submit & Progress -->
     <div class="action-section">
         <div class="action-container">
+            <!-- [disabled]="!images.length" -->
+
             <p-button
                 label="✅ Submit"
                 (onClick)="onSubmit()"
-                [disabled]="!images.length"
                 [raised]="true"
                 severity="contrast"
             />
@@ -134,19 +130,11 @@
                 <button class="btn-close" (click)="closePopupImagePreview()">✕</button>
             </div>
             <div class="popup-body">
-                <img [src]="selectedImage.url" [alt]="selectedImage.name" />
+                <img [src]="selectedImage.previewUrl" [alt]="selectedImage.name" />
                 <div class="popup-footer">
                     <span>Kích thước: {{ selectedImage.size | fileSize }}</span>
                 </div>
             </div>
         </div>
     </div>
-}
-
-<!-- File upload -->
-@if (showPopupChooseFiles) {
-    <file-upload-component
-        (closePopup)="onShowPopupChooseFiles(false)"
-        [(files)]="uploadedFiles"
-    ></file-upload-component>
 }

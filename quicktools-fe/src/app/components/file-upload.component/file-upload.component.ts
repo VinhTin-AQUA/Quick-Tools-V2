@@ -11,14 +11,8 @@ import { FileSizePipe } from '../../pipes/file-size-pipe';
     styleUrl: './file-upload.component.css',
 })
 export class FileUploadComponent {
-    closePopup = output<void>();
     files = model<File[]>([]);
-
-    // Khi muốn đóng popup
-    onClosePopup() {
-        this.files.set([]);
-        this.closePopup.emit();
-    }
+    isDragging = false;
 
     onSelectFile(event: FileSelectEvent) {
         const fileList = event.currentFiles || [];
@@ -28,6 +22,39 @@ export class FileUploadComponent {
         // filesArray.forEach((file, index) => {
         //     console.log(`File ${index + 1}: ${file.name} (${file.size} bytes)`);
         // });
+    }
 
+    // Khi file được kéo vào vùng upload
+    onDragOver(event: DragEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        this.isDragging = true;
+    }
+
+    // Khi file rời khỏi vùng upload
+    onDragLeave(event: DragEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        this.isDragging = false;
+    }
+
+    // Khi thả file
+    onDrop(event: DragEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        this.isDragging = false;
+
+        const fileList = event.dataTransfer?.files;
+
+        if (!fileList || fileList.length === 0) {
+            return;
+        }
+
+        const filesArray = Array.from(fileList).filter((file) => file.type.startsWith('image/'));
+
+        this.files.set(filesArray);
     }
 }

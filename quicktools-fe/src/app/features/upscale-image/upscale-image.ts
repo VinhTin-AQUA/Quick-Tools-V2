@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ImageItem } from './models';
 import { SelectModule } from '@openng/optimus-ui/select';
@@ -31,30 +31,29 @@ export class UpscaleImage {
     selectedOption: string = '1';
     sizeMultiplierOptions = ['1', '2'];
 
-    images: ImageItem[] = [];
+    uploadedFiles = signal<File[]>([]);
+    totalSize = computed(() => {
+        return this.uploadedFiles().reduce((sum, file) => sum + file.size, 0);
+    });
+
+    previewImages = computed(() => {
+        const images = this.uploadedFiles().map((file) => {
+            const image: ImageItem = {
+                id: crypto.randomUUID().toString(),
+                name: file.name,
+                previewUrl: URL.createObjectURL(file),
+                size: file.size,
+            };
+            return image;
+        });
+        return images;
+    });
     selectedImage: ImageItem | null = null;
     showPopupImagePreview: boolean = false;
-
-    uploadedFiles: File[] = [];
-    totalSize: number = 0;
-    showPopupChooseFiles: boolean = false;
+    processedImages = signal<ImageItem[]>([]);
 
     progress: number = 0;
     isUploading: boolean = false;
-
-    get processedImages(): ImageItem[] {
-        return this.images.map((img) => ({
-            ...img,
-            selected: img.selected || false,
-        }));
-    }
-
-
-    onShowPopupChooseFiles(flag: boolean = true) {
-        this.showPopupChooseFiles = flag;
-    }
-
-
 
     onImageClick(image: ImageItem): void {
         this.selectedImage = image;
@@ -67,17 +66,15 @@ export class UpscaleImage {
     }
 
     onClear(): void {
-        this.images = [];
         this.progress = 0;
+        this.uploadedFiles.set([]);
     }
 
     onSubmit(): void {
-        console.log('Submitting images:', this.uploadedFiles.length);
+        console.log('Submitting images:', this.uploadedFiles().length);
     }
 
     toggleSelect(image: ImageItem): void {
         image.selected = !image.selected;
     }
-
-
 }

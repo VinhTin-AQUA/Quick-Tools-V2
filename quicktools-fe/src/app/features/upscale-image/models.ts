@@ -1,8 +1,7 @@
 export interface ImageItem {
-    id: number;
+    id: string;
     name: string;
     size: number;
-    url: string;
-    thumbnail: string;
+    previewUrl: string;
     selected?: boolean;
 }
