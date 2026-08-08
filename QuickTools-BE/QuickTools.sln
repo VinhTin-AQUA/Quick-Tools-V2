@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickTools", "QuickTools\QuickTools.csproj", "{6F0D80D1-A09D-4D2F-B12F-17B5FA4680DD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickTools.Windows", "QuickTools.Windows\QuickTools.Windows.csproj", "{6F0D80D1-A09D-4D2F-B12F-17B5FA4680DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
