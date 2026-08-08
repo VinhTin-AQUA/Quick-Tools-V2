@@ -1,4 +1,5 @@
 ﻿using QuickTools.Windows.Handlers;
+using QuickTools.Windows.Handlers.IloveimgHandlers;
 using QuickTools.Windows.Modules.LoaderManager;
 using QuickTools.Windows.Modules.WebUI;
 using QuickTools.Windows.Modules.WebUI.Methods;
@@ -14,12 +15,13 @@ namespace QuickTools.Windows
             // Tạo window
             var window = WebUIWindow.CreateNewWindow();
             
-            InterfaceBinder.Bind(window, "longTask", ExampleHandlers.LongTaskHandler);
-            InterfaceBinder.Bind(window, "getData", ExampleHandlers.GetDataHandler);
-            InterfaceBinder.Bind(window, "sendData", ExampleHandlers.SendDataHandler);
-            InterfaceBinder.Bind(window, "requestData", ExampleHandlers.RequestDataHandler);
-            InterfaceBinder.BindAsyncFunction(window, "asyncFunction", ExampleHandlers.MyAsyncFunction);
-            InterfaceBinder.BindAsyncFunction(window, "uploadFile", ExampleHandlers.UploadFileAsync);
+            // InterfaceBinder.Bind(window, "longTask", ExampleHandlers.LongTaskHandler);
+            // InterfaceBinder.Bind(window, "getData", ExampleHandlers.GetDataHandler);
+            // InterfaceBinder.Bind(window, "sendData", ExampleHandlers.SendDataHandler);
+            // InterfaceBinder.Bind(window, "requestData", ExampleHandlers.RequestDataHandler);
+            // InterfaceBinder.BindAsyncFunction(window, "asyncFunction", ExampleHandlers.MyAsyncFunction);
+            
+            InterfaceBinder.BindAsyncFunctionWithNullValue(window, "upscaleImage", UpscaleImageHandler.UpscaleImage);
 
             // Cấu hình async
             WebUIWindow.SetConfig(webui_config.asynchronous_response, true);
@@ -37,8 +39,5 @@ namespace QuickTools.Windows
             // Wait
             WebUIWindow.WebUIWait();
         }
-        
-        
-
     }
 }

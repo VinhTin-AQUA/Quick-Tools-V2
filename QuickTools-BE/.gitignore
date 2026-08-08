@@ -432,3 +432,7 @@ QuickTools/Native/*
 !QuickTools/Native/.gitkeep
 .vscode
 .idea
+
+QuickTools.Windows/wwwroot/*
+!QuickTools.Windows/wwwroot/.gitkeep
+

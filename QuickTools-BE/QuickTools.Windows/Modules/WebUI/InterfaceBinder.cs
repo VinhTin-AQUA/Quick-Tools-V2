@@ -63,6 +63,41 @@ namespace QuickTools.Windows.Modules.WebUI
         }
         
         /// <summary>
+        /// Bind một async function - return value
+        /// </summary>
+        public static void BindAsyncFunctionWithNullValue(UIntPtr window, string functionName, Func<UIntPtr, UIntPtr, IntPtr, UIntPtr, UIntPtr, Task<object?>> asyncFunc)
+        {
+            // Tạo handler wrapper
+            _asyncCallback = (w, et, el, en, bi) =>
+            {
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        // Gọi async function
+                        var result = await asyncFunc(w, et, el, en, bi);
+                        
+                        // Trả về kết quả
+                        string json = JsonSerializer.Serialize(result);
+                        InterfaceMethods.webui_interface_set_response(w, en, json);
+                    }
+                    catch (Exception ex)
+                    {
+                        InterfaceMethods.webui_interface_set_response(w, en, $"Error: {ex.Message}");
+                    }
+                });
+            };
+
+            // Bind với WebUI
+            IntPtr ptr = Marshal.GetFunctionPointerForDelegate(_asyncCallback);
+            InterfaceMethods.webui_interface_bind(window, functionName, ptr);
+
+            // Cấu hình async
+            ConfigMethods.webui_set_config(webui_config.asynchronous_response, true);
+            ConfigMethods.webui_set_event_blocking(window, false);
+        }
+        
+        /// <summary>
         /// Bind một async action với WebUI - no return value
         /// </summary>
         public static void BindAsyncAction(UIntPtr window, string functionName, Func<UIntPtr, UIntPtr, IntPtr, UIntPtr, UIntPtr, Task> asyncAction)

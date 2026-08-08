@@ -21,7 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="uploads\" />
+      <ProjectReference Include="..\QuickTools.Services\QuickTools.Services.csproj" />
     </ItemGroup>
     
 </Project>
