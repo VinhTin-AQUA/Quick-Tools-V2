@@ -4,10 +4,11 @@ import { ImageItem } from './models';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { FileUploadEvent, FileUploadModule } from '@openng/optimus-ui/fileupload';
-
 import { BadgeModule } from '@openng/optimus-ui/badge';
 import { ProgressBarModule } from '@openng/optimus-ui/progressbar';
 import { FileUploadComponent } from '../../components/file-upload.component/file-upload.component';
+
+import { FileSizePipe } from '../../pipes/file-size-pipe';
 
 @Component({
     selector: 'app-upscale-image',
@@ -20,8 +21,8 @@ import { FileUploadComponent } from '../../components/file-upload.component/file
         ButtonModule,
         FileUploadModule,
         ProgressBarModule,
-
         FileUploadComponent,
+        FileSizePipe,
     ],
     templateUrl: './upscale-image.html',
     styleUrl: './upscale-image.css',
@@ -48,24 +49,19 @@ export class UpscaleImage {
         }));
     }
 
-    formatFileSize(bytes: number): string {
-        if (bytes === 0) return '0 B';
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        const size = bytes / Math.pow(k, i);
 
-        if (i === 0) return `${size} ${sizes[i]}`;
-        if (i === 1) return `${Math.round(size)} ${sizes[i]}`;
-        return `${size.toFixed(1)} ${sizes[i]}`;
+    onShowPopupChooseFiles(flag: boolean = true) {
+        this.showPopupChooseFiles = flag;
     }
+
+
 
     onImageClick(image: ImageItem): void {
         this.selectedImage = image;
         this.showPopupImagePreview = true;
     }
 
-    closePopup(): void {
+    closePopupImagePreview(): void {
         this.showPopupImagePreview = false;
         this.selectedImage = null;
     }
@@ -76,16 +72,12 @@ export class UpscaleImage {
     }
 
     onSubmit(): void {
-        const selectedImages = this.images.filter((img) => img.selected);
-        console.log('Submitting images:', selectedImages);
+        console.log('Submitting images:', this.uploadedFiles.length);
     }
 
     toggleSelect(image: ImageItem): void {
         image.selected = !image.selected;
     }
 
-    /* upload file */
-    onShowPopupChooseFiles(flag: boolean = true) {
-        this.showPopupChooseFiles = flag;
-    }
+
 }

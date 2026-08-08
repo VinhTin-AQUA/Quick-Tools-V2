@@ -60,7 +60,7 @@
                         </div>
                         <div class="image-info">
                             <span class="image-name">{{ image.name }}</span>
-                            <span class="image-size">{{ formatFileSize(image.size) }}</span>
+                            <span class="image-size">{{ image.size | fileSize }}</span>
                         </div>
                     </div>
                 } @empty {
@@ -79,7 +79,7 @@
                     <div class="image-item processed-item">
                         <div class="image-info">
                             <span class="image-name">{{ image.name }}</span>
-                            <span class="image-size">{{ formatFileSize(image.size) }}</span>
+                            <span class="image-size">{{ image.size | fileSize }}</span>
                         </div>
 
                         <p-button
@@ -127,16 +127,16 @@
 
 <!-- Popup for image preview -->
 @if (showPopupImagePreview && selectedImage) {
-    <div class="popup-overlay" (click)="closePopup()">
+    <div class="popup-overlay" (click)="closePopupImagePreview()">
         <div class="popup-content" (click)="$event.stopPropagation()">
             <div class="popup-header">
                 <h3>{{ selectedImage.name }}</h3>
-                <button class="btn-close" (click)="closePopup()">✕</button>
+                <button class="btn-close" (click)="closePopupImagePreview()">✕</button>
             </div>
             <div class="popup-body">
                 <img [src]="selectedImage.url" [alt]="selectedImage.name" />
                 <div class="popup-footer">
-                    <span>Kích thước: {{ formatFileSize(selectedImage.size) }}</span>
+                    <span>Kích thước: {{ selectedImage.size | fileSize }}</span>
                 </div>
             </div>
         </div>

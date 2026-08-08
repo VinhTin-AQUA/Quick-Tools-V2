@@ -1,6 +1,6 @@
 <div class="choose-files-wrapper">
     <div class="file-upload-empty">
-        <p-button class="file-upload-close" (click)="onUploadCompleted()">
+        <p-button class="file-upload-close" (click)="onClosePopup()">
             <i class="pi pi-times"></i>
         </p-button>
 
@@ -9,13 +9,37 @@
         <p class="file-upload-empty-text">Drag and drop files to here to upload.</p>
 
         <div class="file-upload-actions">
-            <p-button
-           
-                icon="pi pi-images"
-                label="Choose files"
-                [rounded]="true"
-                [outlined]="true"
+            <p-fileupload
+                #fileUpload
+                mode="basic"
+                chooseIcon="pi pi-upload"
+                accept="image/*"
+                chooseLabel="Browse"
+                url="your-api-endpoint"
+                (onSelect)="onSelectFile($event)"
+                multiple="true"
             />
+
+            <div class="file-list">
+    @for (file of this.files(); track $index) {
+        <div class="file-card">
+            <div class="file-info">
+
+                <div class="file-name">
+                    <span [title]="file.name">
+                        {{ file.name }}
+                    </span>
+                </div>
+            </div>
+
+            <p-tag
+                severity="info"
+                [value]="file.size | fileSize"
+                class="file-size"
+            />
+        </div>
+    }
+</div>
         </div>
     </div>
 </div>
