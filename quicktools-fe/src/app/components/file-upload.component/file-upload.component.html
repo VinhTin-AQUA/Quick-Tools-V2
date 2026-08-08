@@ -1,0 +1,21 @@
+<div class="choose-files-wrapper">
+    <div class="file-upload-empty">
+        <p-button class="file-upload-close" (click)="onUploadCompleted()">
+            <i class="pi pi-times"></i>
+        </p-button>
+
+        <i class="pi pi-cloud-upload file-upload-empty-icon" aria-hidden="true"></i>
+
+        <p class="file-upload-empty-text">Drag and drop files to here to upload.</p>
+
+        <div class="file-upload-actions">
+            <p-button
+           
+                icon="pi pi-images"
+                label="Choose files"
+                [rounded]="true"
+                [outlined]="true"
+            />
+        </div>
+    </div>
+</div>

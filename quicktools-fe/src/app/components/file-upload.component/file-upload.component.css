@@ -1,0 +1,75 @@
+.choose-files-wrapper {
+    position: fixed;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    z-index: 9999;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.file-upload-empty {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    width: 80%;
+    height: 80%;
+    padding: 2rem;
+
+    box-sizing: border-box;
+    text-align: center;
+
+    background-color: color-mix(in srgb, var(--p-content-background) 95%, transparent);
+
+    border: 1px solid var(--p-content-border-color);
+    border-radius: 12px;
+
+    /* tạo cảm giác nổi */
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.12),
+        0 2px 8px rgba(0, 0, 0, 0.08);
+
+    /* tách nhẹ khỏi background */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.file-upload-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 2.25rem;
+    height: 2.25rem;
+
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+
+    background: transparent;
+    color: var(--p-text-muted-color);
+
+    font-size: 1.1rem;
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s,
+        color 0.2s;
+}
+
+.file-upload-close:hover {
+    background-color: var(--p-content-hover-background);
+    color: var(--p-text-color);
+}

@@ -16,7 +16,7 @@
                 <label class="control-label">Size multiplier:</label>
 
                 <p-select
-                    [options]="getSelectOptions()"
+                    [options]="sizeMultiplierOptions"
                     [(ngModel)]="selectedOption"
                     placeholder="Select a City"
                     class="custom-select"
@@ -31,7 +31,11 @@
                     severity="contrast"
                 />
 
-                <p-button severity="success" (onClick)="onUpload()" [disabled]="isUploading">
+                <p-button
+                    (onClick)="onShowPopupChooseFiles()"
+                    severity="success"
+                    [disabled]="isUploading"
+                >
                     <span class="icon"></span>
                     <span>{{ 'Upload' }}</span>
                 </p-button>
@@ -122,7 +126,7 @@
 </div>
 
 <!-- Popup for image preview -->
-@if (showPopup && selectedImage) {
+@if (showPopupImagePreview && selectedImage) {
     <div class="popup-overlay" (click)="closePopup()">
         <div class="popup-content" (click)="$event.stopPropagation()">
             <div class="popup-header">
@@ -137,4 +141,12 @@
             </div>
         </div>
     </div>
+}
+
+<!-- File upload -->
+@if (showPopupChooseFiles) {
+    <file-upload-component
+        (closePopup)="onShowPopupChooseFiles(false)"
+        [(files)]="uploadedFiles"
+    ></file-upload-component>
 }
