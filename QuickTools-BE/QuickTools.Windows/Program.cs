@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using System.Text.Json;
+﻿using QuickTools.Windows.Handlers;
 using QuickTools.Windows.Modules.LoaderManager;
 using QuickTools.Windows.Modules.WebUI;
 using QuickTools.Windows.Modules.WebUI.Methods;
@@ -8,245 +7,38 @@ namespace QuickTools.Windows
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static void Main()
         {
             NativeLibraryManager.Initialize();
 
             // Tạo window
-            var window = WindowManagementMethods.webui_new_window();
+            var window = WebUIWindow.CreateNewWindow();
             
-            InterfaceBinder.Bind(window, "longTask", LongTaskHandler);
-            InterfaceBinder.Bind(window, "getData", GetDataHandler);
-            InterfaceBinder.Bind(window, "sendData", SendDataHandler);
-            InterfaceBinder.Bind(window, "requestData", RequestDataHandler);
-            InterfaceBinder.BindAsyncFunction(window, "asyncFunction", MyAsyncFunction);
-            
-            InterfaceBinder.BindAsyncFunction(window, "uploadFile", UploadFileAsync);
+            InterfaceBinder.Bind(window, "longTask", ExampleHandlers.LongTaskHandler);
+            InterfaceBinder.Bind(window, "getData", ExampleHandlers.GetDataHandler);
+            InterfaceBinder.Bind(window, "sendData", ExampleHandlers.SendDataHandler);
+            InterfaceBinder.Bind(window, "requestData", ExampleHandlers.RequestDataHandler);
+            InterfaceBinder.BindAsyncFunction(window, "asyncFunction", ExampleHandlers.MyAsyncFunction);
+            InterfaceBinder.BindAsyncFunction(window, "uploadFile", ExampleHandlers.UploadFileAsync);
 
             // Cấu hình async
-            ConfigMethods.webui_set_config(webui_config.asynchronous_response, true);
-            ConfigMethods.webui_set_event_blocking(window, false);
+            WebUIWindow.SetConfig(webui_config.asynchronous_response, true);
+            WebUIWindow.SetEventBlocking(window, false);
             
             // Set root folder (thư mục chứa file HTML và các assets)
             string rootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-            FileAndFolderMethods.webui_set_root_folder(window, rootPath);
+            WebUIWindow.WebuiSetRootFolder(window, rootPath);
             Console.WriteLine($"Root folder set to: {rootPath}");
             
             // Show window
-        
             // WebUIManager.Show(window, "/wwwroot/index.html");
-            WebUIManager.Show(window, "index.html");
+            WebUIWindow.Show(window, "index.html");
 
             // Wait
-            WindowManagementMethods.webui_wait();
-
-            // Cleanup
-            WebUIManager.Cleanup();
+            WebUIWindow.WebUIWait();
         }
         
-        // Xử lý các tác vụ tốn thời gian mà không block UI, như tính toán phức tạp, xử lý dữ liệu lớn.
-        private static void LongTaskHandler(UIntPtr window, UIntPtr event_type, IntPtr element, UIntPtr event_number, UIntPtr bind_id)
-        {
-            // Lấy param
-            long param = InterfaceMethods.webui_interface_get_int_at(window, event_number, UIntPtr.Zero);
-            Console.WriteLine($"[LongTask] Started with param: {param}");
-
-            Task.Run(async () =>
-            {
-                try
-                {
-                    await Task.Delay(5000);
-                    long result = param * 2;
-
-                    // Trả về kết quả
-                    InterfaceMethods.webui_interface_set_response(window, event_number, result.ToString());
-                    Console.WriteLine($"[LongTask] Completed: {result}");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[LongTask] Error: {ex.Message}");
-                    InterfaceMethods.webui_interface_set_response(window, event_number, $"Error: {ex.Message}");
-                }
-            });
-        }
-
-        // Lấy dữ liệu từ Backend
-        private static void GetDataHandler(UIntPtr window, UIntPtr event_type, IntPtr element, UIntPtr event_number, UIntPtr bind_id)
-        {
-            Console.WriteLine("[GetData] Fetching data...");
-
-            Task.Run(async () =>
-            {
-                try
-                {
-                    await Task.Delay(1500);
-                    var data = new
-                    {
-                        id = 123,
-                        name = "Sample Data",
-                        items = new[] { "Item1", "Item2", "Item3" },
-                        timestamp = DateTime.Now
-                    };
-                    string json = JsonSerializer.Serialize(data);
-                    InterfaceMethods.webui_interface_set_response(window, event_number, json);
-                    Console.WriteLine("[GetData] Data returned");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[GetData] Error: {ex.Message}");
-                    InterfaceMethods.webui_interface_set_response(window, event_number, $"Error: {ex.Message}");
-                }
-            });
-        }
-
-        // Gửi dữ liệu xuống Backend
-        private static void SendDataHandler(UIntPtr window, UIntPtr event_type, IntPtr element, UIntPtr event_number, UIntPtr bind_id)
-        {
-            // Lấy string data từ event
-            IntPtr dataPtr = InterfaceMethods.webui_interface_get_string_at(window, event_number, UIntPtr.Zero);
-            string jsonData = MarshalHelper.PtrToString(dataPtr);
-            Console.WriteLine($"[SendData] Received: {jsonData}");
-
-            Task.Run(async () =>
-            {
-                try
-                {
-                    await Task.Delay(2000);
-                    
-                    // Parse và validate data
-                    if (!string.IsNullOrEmpty(jsonData))
-                    {
-                        using var doc = JsonDocument.Parse(jsonData);
-                        var root = doc.RootElement;
-                        
-                        if (root.TryGetProperty("name", out var nameElement) &&
-                            root.TryGetProperty("email", out var emailElement))
-                        {
-                            string name = nameElement.GetString();
-                            string email = emailElement.GetString();
-                            Console.WriteLine($"[SendData] Parsed: Name={name}, Email={email}");
-                        }
-                    }
-                    
-                    InterfaceMethods.webui_interface_set_response(window, event_number, "Data saved successfully!");
-                    Console.WriteLine("[SendData] Data saved");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[SendData] Error: {ex.Message}");
-                    InterfaceMethods.webui_interface_set_response(window, event_number, $"Error: {ex.Message}");
-                }
-            });
-        }
-
-        // Xử lý request với ID riêng, thường dùng cho async operations cần theo dõi trạng thái.
-        private static void RequestDataHandler(UIntPtr window, UIntPtr event_type, IntPtr element, UIntPtr event_number, UIntPtr bind_id)
-        {
-            IntPtr requestIdPtr = InterfaceMethods.webui_interface_get_string_at(window, event_number, UIntPtr.Zero);
-            string requestId = MarshalHelper.PtrToString(requestIdPtr);
-            Console.WriteLine($"[RequestData] Request ID: {requestId}");
-
-            Task.Run(async () =>
-            {
-                try
-                {
-                    await Task.Delay(3000);
-                    var response = new
-                    {
-                        requestId = requestId,
-                        status = "success",
-                        data = "Response data from backend",
-                        timestamp = DateTime.Now
-                    };
-                    string json = JsonSerializer.Serialize(response);
-                    InterfaceMethods.webui_interface_set_response(window, event_number, json);
-                    Console.WriteLine($"[RequestData] Response sent for: {requestId}");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[RequestData] Error: {ex.Message}");
-                    var errorResponse = new
-                    {
-                        requestId = requestId,
-                        status = "error",
-                        error = ex.Message
-                    };
-                    string json = JsonSerializer.Serialize(errorResponse);
-                    InterfaceMethods.webui_interface_set_response(window, event_number, json);
-                }
-            });
-        }
         
-        // Async Function thuần túy
-        private static async Task<object> MyAsyncFunction(UIntPtr window, UIntPtr event_type, IntPtr element, UIntPtr event_number, UIntPtr bind_id)
-        {
-            // Giả lập xử lý async với Task.Delay
-            Console.WriteLine("[MyAsyncFunction] Step 1: Fetching data...");
-            await Task.Delay(1000);
-            
-            Console.WriteLine("[MyAsyncFunction] Step 2: Processing data...");
-            await Task.Delay(1000);
-            
-            Console.WriteLine("[MyAsyncFunction] Step 3: Saving to database...");
-            await Task.Delay(1000);
-            
-            // Trả về kết quả
-            return new
-            {
-                id = 123,
-                name = "Sample Data",
-                status = "completed",
-                processedAt = DateTime.Now,
-                items = new[] { "Item1", "Item2", "Item3" }
-            };
-        }
-        
-        // ==================== Async Function trả về object ====================
-        private static async Task<object> UploadFileAsync(UIntPtr window, UIntPtr event_type, IntPtr element, UIntPtr event_number, UIntPtr bind_id)
-        {
-            // Lấy dữ liệu từ JavaScript
-            IntPtr dataPtr = InterfaceMethods.webui_interface_get_string_at(window, event_number, UIntPtr.Zero);
-            string jsonData = Marshal.PtrToStringAnsi(dataPtr);
-            
-            Console.WriteLine($"[UploadFile] Received data length: {jsonData?.Length ?? 0}");
-
-            // Parse JSON
-            using var doc = JsonDocument.Parse(jsonData);
-            var root = doc.RootElement;
-            
-            string fileName = root.GetProperty("fileName").GetString();
-            string fileContent = root.GetProperty("fileContent").GetString();
-            
-            Console.WriteLine($"[UploadFile] File name: {fileName}");
-
-            // Tạo thư mục uploads
-            string uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
-            if (!Directory.Exists(uploadDir))
-            {
-                Directory.CreateDirectory(uploadDir);
-            }
-
-            // Decode Base64 thành byte array
-            byte[] fileBytes = Convert.FromBase64String(fileContent);
-
-            // Lưu file
-            string safeFileName = $"{DateTime.Now:yyyyMMdd_HHmmss}_{Path.GetFileName(fileName)}";
-            string filePath = Path.Combine(uploadDir, safeFileName);
-            
-            await File.WriteAllBytesAsync(filePath, fileBytes);
-            
-            Console.WriteLine($"[UploadFile] File saved: {filePath} ({fileBytes.Length} bytes)");
-
-            // Trả về kết quả
-            return new
-            {
-                status = "success",
-                fileName = safeFileName,
-                filePath = filePath,
-                size = fileBytes.Length,
-                message = "File uploaded successfully!"
-            };
-        }
 
     }
 }
